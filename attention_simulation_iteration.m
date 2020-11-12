@@ -31,6 +31,7 @@ function [estimates, plot_vars] = attention_simulation_iteration(n_voxels,sim_pa
     %Method 1: Z-scoring
     dplus.zbeta_estimates = zscore(dplus.detrended_response')'/dplus.detrended_design;
     estimates.zscore = mean(dplus.zbeta_estimates(:,1)-dplus.zbeta_estimates(:,2));
+
     
     %Method 2: SVM classifier for TaskD+
     svm_correct = {};
@@ -119,6 +120,13 @@ function [estimates, plot_vars] = attention_simulation_iteration(n_voxels,sim_pa
     deming_regression = deming(dminus.contrast_estimates,dplus.contrast_estimates);
     estimates.deming_regression =  deming_regression(2);
     estimates.deming_est = 1/(1-estimates.deming_regression);
+
+    % Method 7: L2 norm (Kay et al., 2019)
+    vox_norm = sqrt(sum([dplus.beta_estimates dminus.beta_estimates] .^2, 2));
+    dplus_bnorm = bsxfun(@rdivide, dplus.beta_estimates, vox_norm);
+    dminus_bnorm = bsxfun(@rdivide, dminus.beta_estimates, vox_norm);
+    estimates.l2_dplus = mean(dplus_bnorm * [1; -1], 1);
+    estimates.l2_inter = mean([dminus_bnorm dplus_bnorm] * [1; -1; -1; 1], 1);
     
     % Assigning variables needed for plotting 
     plot_vars=struct('dplus',dplus,'dminus',dminus,'deming_regression',deming_regression);
