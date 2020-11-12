@@ -216,5 +216,8 @@ set(gcf,'position',[x0,y0,width,height])
 fname = 'plot_4.png';
 saveas(gcf,fname,'png');
 hold off
+
+
+
 close all
 end
